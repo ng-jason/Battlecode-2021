@@ -62,7 +62,11 @@ public strictfp class RobotPlayer {
     }
 
     static void runEnlightenmentCenter() throws GameActionException {
-        RobotType toBuild = randomSpawnableRobotType();
+//        RobotType toBuild = randomSpawnableRobotType();
+        // testing to see which bot is which on the gamerunner client
+        // 1 - politician, 2 - slander, 3 - muckraker
+//        RobotType toBuild = RobotType.POLITICIAN;
+        RobotType toBuild = RobotType.SLANDERER;
         int influence = 50;
         for (Direction dir : directions) {
             if (rc.canBuildRobot(toBuild, dir, influence)) {

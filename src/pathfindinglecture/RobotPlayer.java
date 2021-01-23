@@ -148,7 +148,7 @@ public strictfp class RobotPlayer {
     static Direction bugDirection = null;
 
     static void basicBug(MapLocation target) throws GameActionException {
-        Direction d = rc.getLocation().directionTo(target);
+          Direction d = rc.getLocation().directionTo(target);
         if (rc.getLocation().equals(target)) {
             // do something else, now that you're there
             // here we'll just explode
