@@ -12,6 +12,7 @@ public class EnlightenmentCenter extends Robot {
     static int robotCount = 0;
     static int[] robotIDs; // IDs of robot can use to see if they are still alive etc using senseID
     static MapLocation[] enlightenmentCenterLocations;
+    static Integer targetID;
 
 
     public EnlightenmentCenter(RobotController rc) throws GameActionException {
@@ -26,6 +27,7 @@ public class EnlightenmentCenter extends Robot {
 //        if (target != null) {
 //            Direction d = rc.getLocation().directionTo(target);
 //        }
+        senseEnemy();
         for (Direction dir : directions) {
             if (rc.canBuildRobot(toBuild, dir, influence)) {
                 rc.buildRobot(toBuild, dir, influence);
@@ -60,5 +62,30 @@ public class EnlightenmentCenter extends Robot {
      */
     static RobotType randomSpawnableRobotType() {
         return spawnableRobot[(int) (Math.random() * spawnableRobot.length)];
+    }
+
+    /**
+     * Detects if there are any enemy robots within its sensor radius. If there
+     * are, then the centre raises a flag telling other robots to target it
+     * until it's either out of the radius, destroyed, or converted
+     */
+    static void senseEnemy() {
+        try {
+            if (targetID != null && (!rc.canSenseRobot(targetID)
+            || rc.senseRobot(targetID).getTeam() == rc.getTeam())) {
+                targetID = null;
+            }
+            if (targetID == null) {
+                RobotInfo[] robots = rc.senseNearbyRobots();
+                for (RobotInfo robot : robots) {
+                    if (robot.getTeam() == rc.getTeam().opponent()) {
+                        targetID = robot.getID();
+                        sendLocation(robot.getLocation());
+                        break;
+                    }
+                }
+                rc.setFlag(0);
+            }
+        } catch (Exception e) {}
     }
 }
