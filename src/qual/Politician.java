@@ -2,6 +2,7 @@ package qual;
 
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
 import battlecode.common.Team;
 
 public class Politician extends Robot {
@@ -15,18 +16,15 @@ public class Politician extends Robot {
 
     @Override
     public void run() throws GameActionException {
+        super.run();
+        // from example player
         Team enemy = rc.getTeam().opponent();
         int actionRadius = rc.getType().actionRadiusSquared;
-        if (Math.random() < polPassFactor * rc.sensePassability(rc.getLocation())) {
-            if (rc.senseNearbyRobots().length * 2 >= rc.getConviction()
-                    && rc.canEmpower(actionRadius)) {
-                System.out.println("empowering...");
-                rc.empower(actionRadius);
-                System.out.println("empowered");
-                return;
-            }
+        RobotInfo[] attackable = rc.senseNearbyRobots(actionRadius, enemy);
+        if (attackable.length != 0 && rc.canEmpower(actionRadius)) {
+            System.out.println("empowering...");
+            rc.empower(actionRadius);
+            System.out.println("empowered");
         }
-        if (tryMove(randomDirection()))
-            System.out.println("I moved!");
     }
 }

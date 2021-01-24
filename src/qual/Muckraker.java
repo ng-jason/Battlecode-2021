@@ -16,6 +16,7 @@ public class Muckraker extends Robot {
 
     @Override
     public void run() throws GameActionException {
+        super.run();
         Team enemy = rc.getTeam().opponent();
         int actionRadius = rc.getType().actionRadiusSquared;
         if (Math.random() < muckPassFactor * rc.sensePassability(rc.getLocation())) {
@@ -30,7 +31,5 @@ public class Muckraker extends Robot {
                 }
             }
         }
-        if (tryMove(randomDirection()))
-            System.out.println("I moved!");
     }
 }

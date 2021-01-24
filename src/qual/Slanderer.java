@@ -11,7 +11,6 @@ public class Slanderer extends Robot {
 
     @Override
     public void run() throws GameActionException {
-        if (tryMove(randomDirection()))
-            System.out.println("I moved!");
+        super.run();
     }
 }
