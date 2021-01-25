@@ -2,7 +2,7 @@ package qual;
 
 import battlecode.common.*;
 
-import java.util.Set;
+import java.util.*;
 
 public abstract class Robot {
 
@@ -21,7 +21,7 @@ public abstract class Robot {
         NONE,
         EXPLORING,
         HASTARGET
-    };
+    }
 
     static RobotController rc;
     static int myId;
@@ -175,27 +175,46 @@ public abstract class Robot {
     //             not the best bug, but works for "simple" obstacles
     //             for better bugs, think about Bug 2!
 
-    static final double passabilityThreshold = 0.7; // make passability variable depending on surroundings
+    //static final double passabilityThreshold = 0.7; // make passability variable depending on surroundings
+    static double passabilityThreshold = 0.5;
     static Direction bugDirection = null;
 
     static void basicBug(MapLocation target) throws GameActionException {
         Direction d = rc.getLocation().directionTo(target);
+        List<Direction> oppositeDirections = Arrays.asList(d.opposite(), d.opposite().rotateRight(), d.opposite().rotateLeft());
+
         if (rc.isReady()) {
-            if (rc.canMove(d) && rc.sensePassability(rc.getLocation().add(d)) >= passabilityThreshold) {
-                rc.move(d);
-                bugDirection = null;
+            double passabilityOfLocation = rc.sensePassability(rc.getLocation().add(d));
+            if (rc.canMove(d)) {
+                if (passabilityOfLocation >= passabilityThreshold){
+                    rc.move(d);
+                    bugDirection = null;
+                } else if (Math.abs(passabilityOfLocation - passabilityThreshold) >= 0.3) {
+                    rc.move(d);
+                    bugDirection = null;
+                }
             } else {
                 if (bugDirection == null) {
                     bugDirection = d;
                 }
+                double minimumPassibility = 1;
+                for (int i = 0; i < 8; i++) {
+                    if (!oppositeDirections.contains(bugDirection)) {
+                        double passability = rc.sensePassability(rc.getLocation().add(bugDirection));
+                        if (minimumPassibility > passability) {
+                            minimumPassibility = passability;
+                        }
+                    }
+                    bugDirection = bugDirection.rotateRight();
+                }
+
                 for (int i = 0; i < 8; ++i) {
-                    if (rc.canMove(bugDirection) && rc.sensePassability(rc.getLocation().add(bugDirection)) >= passabilityThreshold) {
+                    if (rc.canMove(bugDirection) && rc.sensePassability(rc.getLocation().add(bugDirection)) >= minimumPassibility) {
                         rc.setIndicatorDot(rc.getLocation().add(bugDirection), 0, 255, 255);
                         rc.move(bugDirection);
                         bugDirection = bugDirection.rotateLeft();
                         break;
                     }
-                    rc.setIndicatorDot(rc.getLocation().add(bugDirection), 255, 0, 0);
                     bugDirection = bugDirection.rotateRight();
                 }
             }
