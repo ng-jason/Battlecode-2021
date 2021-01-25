@@ -80,11 +80,13 @@ public class EnlightenmentCenter extends Robot {
                 for (RobotInfo robot : robots) {
                     if (robot.getTeam() == rc.getTeam().opponent()) {
                         targetID = robot.getID();
-                        sendLocation(robot.getLocation());
                         break;
                     }
                 }
                 rc.setFlag(0);
+            }
+            if (targetID != null) {
+                sendLocation(rc.senseRobot(targetID).getLocation()); // wastes a lot of bytecode, might optimise later
             }
         } catch (Exception e) {}
     }
