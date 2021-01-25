@@ -14,6 +14,9 @@ public class EnlightenmentCenter extends Robot {
     static MapLocation[] enlightenmentCenterLocations;
     static Integer targetID;
     static Direction currentSpawnDirection = Direction.NORTH;
+    static int votesLastRound;
+    static int currentTeamVotes;
+    static int bidAmount;
 
 
     public EnlightenmentCenter(RobotController rc) throws GameActionException {
@@ -21,6 +24,9 @@ public class EnlightenmentCenter extends Robot {
         if (rc.getRoundNum() < 1) {
             rc.setFlag(0);
         }
+        bidAmount = rc.getInfluence() / 100;
+        votesLastRound = 0;
+        currentTeamVotes = 0;
     }
 
     @Override
@@ -52,7 +58,18 @@ public class EnlightenmentCenter extends Robot {
             // get a location target from a random friendly robot
 
         }
-        // sendLocation(target, 1);  // for sending extra info like target type
+        // voting algo
+
+        currentTeamVotes = rc.getTeamVotes();
+        if (currentTeamVotes > votesLastRound) {
+            bidAmount -= rc.getInfluence() / 100;
+        } else {
+            bidAmount += rc.getInfluence() / 105;
+        }
+        if (rc.isReady()) {
+            rc.bid(bidAmount);
+        }
+        votesLastRound = currentTeamVotes;
     }
 
     /**
