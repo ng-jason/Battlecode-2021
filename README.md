@@ -1,6 +1,11 @@
-# Battlecode 2021 Scaffold
+# Battlecode 2021
 
-This is the Battlecode 2021 scaffold, containing an `examplefuncsplayer`. Read https://2021.battlecode.org/getting-started!
+### Resources:
+- https://2021.battlecode.org/getting-started!
+- [Google doc of work](https://docs.google.com/document/d/1IcNwx9M8j3e4Ct2S9cmmDb0Nq0PfZuX6sM1KL8Jtkwk/edit?usp=sharing)
+
+### Submission
+- `src/qual` folder contains our final bot
 
 ### Project Structure
 
