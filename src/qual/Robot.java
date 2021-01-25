@@ -2,7 +2,10 @@ package qual;
 
 import battlecode.common.*;
 
+import java.util.Set;
+
 public abstract class Robot {
+
     static final Direction[] directions = {
             Direction.NORTH,
             Direction.NORTHEAST,
@@ -13,6 +16,13 @@ public abstract class Robot {
             Direction.WEST,
             Direction.NORTHWEST,
     };
+
+    enum Status {
+        NONE,
+        EXPLORING,
+        HASTARGET
+    };
+
     static RobotController rc;
     static int myId;
     static MapLocation myLocation;
@@ -21,11 +31,14 @@ public abstract class Robot {
     static Direction targetDirection = null;
 //    static int turnCount;
 //    Team enemyTeam;
+//    static Set<RobotInfo> nearbyFriendlyRobots;
+    static Status status = Status.NONE;
 
     public Robot(RobotController robotController) throws GameActionException {
         rc = robotController;
         myId = rc.getID();
         myLocation = rc.getLocation();
+//        getNearbyFriendlyRobots(); NOT WORKING RN
     }
 
     /**
@@ -37,26 +50,43 @@ public abstract class Robot {
         // get enlightenment center ID here
         if (enlightenmentCenterId == -1) {
             for (RobotInfo robot : rc.senseNearbyRobots(-1, rc.getTeam())) {
+//            for (RobotInfo robot : nearbyFriendlyRobots) {
                 if (robot.type == RobotType.ENLIGHTENMENT_CENTER) {
                     enlightenmentCenterId = robot.ID;
                 }
             }
         }
+        // further state checks depending on STATUS
+
         // move to target
-        if (target == null) {  // no target, get target from EC flag
-            if (rc.canGetFlag(enlightenmentCenterId)) {
-                target = getLocationFromFlag(rc.getFlag(enlightenmentCenterId));
+        // sets status flag if no status or no target
+        if (status == Status.NONE || target == null) {  // no target, get target from EC flag
+            System.out.println("Status is NONE");
+            if (rc.canGetFlag(enlightenmentCenterId)) { // you can always get flag, just need to discern what we are getting
+                if (rc.getFlag(enlightenmentCenterId) != 0) {
+                    System.out.println("Getting target from EC");
+                    target = getLocationFromFlag(rc.getFlag(enlightenmentCenterId));
+                    status = Status.HASTARGET;
+                } else {
+                    System.out.println("No target. Exploring!");
+                    // get direction towards EC that created us, then go in direction opposite to that direction
+                    RobotInfo ec = rc.senseRobot(enlightenmentCenterId);
+                    Direction directionAwayFromEC = rc.getLocation().directionTo(ec.getLocation()).opposite();
+                    int targetX = rc.getLocation().x + (directionAwayFromEC.dx * 64);
+                    int targetY = rc.getLocation().y + (directionAwayFromEC.dy * 64);
+                    target = new MapLocation(targetX, targetY);
+                    status = Status.EXPLORING;
+                }
             }
-            else {
-                int one = 1;//                target = enlightenmentCenterId
+
+        } else if (status == Status.HASTARGET || status == Status.EXPLORING) {  // we already have a target, keep going towards it
+            if (!rc.canDetectLocation(target)) {
+                // target not in range so move towards it
+                System.out.println("I have a target. Moving towards target");
+                basicBug(target);
             }
         }
-        // we already have a target, keep going towards it
-        if (!rc.canDetectLocation(target)) {
-            // target not in range so move towards it
-            System.out.println("Moving towards target");
-            basicBug(target);
-        }
+        System.out.println("Moving towards direction: " + rc.getLocation().directionTo(target));
         // if target is in range, we can make more specific code in their respective files
     }
 
@@ -83,6 +113,7 @@ public abstract class Robot {
 //            return true;
 //        } else return false;
 //    }
+
 
     ////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
@@ -170,4 +201,13 @@ public abstract class Robot {
             }
         }
     }
+
+//    // doesn't work rn
+//    static void getNearbyFriendlyRobots() {
+//        RobotInfo[] robotsInRadius = rc.senseNearbyRobots(-1, rc.getTeam());
+//        for (RobotInfo robot : robotsInRadius) {
+//            System.out.println("Printing friendly robot ID" + robot.getID());
+//            nearbyFriendlyRobots.add(robot);
+//        }
+//    }
 }
